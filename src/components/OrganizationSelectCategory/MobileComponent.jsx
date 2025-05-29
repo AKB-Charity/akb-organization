@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { FaHome } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const MobileComponent = () => {
@@ -8,7 +9,7 @@ const MobileComponent = () => {
     // Handle back button press
     const handleBackButton = (e) => {
       e.preventDefault();
-      navigate("/organization/organization-home");
+      navigate("/organization/home");
     };
 
     // Push a dummy state to history to detect back navigation
@@ -24,9 +25,12 @@ const MobileComponent = () => {
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="w-full py-4 bg-gray-200 text-center font-bold text-lg">
-        Volunteer Dashboard
-      </header>
+      <div className="relative flex flex-row items-center w-full p-4 bg-gray-200">
+        <FaHome className="absolute left-4 text-3xl text-black-600 cursor-pointer" onClick={() => navigate("/organization/home")} />
+        <header className="mx-auto text-center font-bold text-lg">
+          Organization Dashboard
+        </header>
+      </div>
 
       {/* Content */}
       <div className="flex flex-col w-full max-w-md px-4 py-12 space-y-4">

@@ -11,34 +11,11 @@ const MobileComponent = () => {
       Organization Dashboard
       </h1>
 
-      {/* Profile and Balance Section */}
-      <div className="bg-gray-200 rounded-lg p-4 flex flex-col items-center mb-6">
-        <img
-          src="https://via.placeholder.com/100"
-          alt="Profile"
-          className="rounded-full w-24 h-24 mb-4"
-        />
-        <div className="text-center">
-          <p>
-            Current Balance : <span className="font-semibold">1000</span>
-          </p>
-          <p>
-            Receivable Amount : <span className="font-semibold">500</span>
-          </p>
-          <p>
-            Today Limit : <span className="font-semibold">50</span>
-          </p>
-        </div>
-      </div>
-
       {/* Welcome Section */}
       <div className="text-center mb-6">
         <h2 className="text-xl font-semibold">Hi, ABC Trust</h2>
         <p className="text-gray-500">
           Welcome back to your Organization Dashboard!
-        </p>
-        <p className="text-red-500 font-semibold mt-2">
-          50 organization specific donation photos pending
         </p>
       </div>
 

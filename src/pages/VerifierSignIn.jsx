@@ -14,6 +14,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router";
 import api from "../api.js";
 import { Link } from "react-router-dom";
+import { LoadingContext } from "../components/CustomComponent/Context.jsx";
+import { useContext } from "react";
 
 const VerifierSignIn = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -22,6 +24,7 @@ const VerifierSignIn = () => {
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const {setLoading} = useContext(LoadingContext);
 
   const navigate = useNavigate();
 
@@ -50,7 +53,9 @@ const VerifierSignIn = () => {
       password: password,
     };
     try {
+      setLoading(true);
       const response = await api.post("/api/login_organization/", data);
+      setLoading(false);
 
       localStorage.setItem("accessToken", response.data.access);
       localStorage.setItem("refreshToken", response.data.refresh);
@@ -65,10 +70,11 @@ const VerifierSignIn = () => {
       setOpenSnackbar(true);
 
       setTimeout(() => {
-        navigate("/organization/organization-home");
+        navigate("/organization/home");
       }, 1500);
       console.log("Sign in successful");
     } catch (error) {
+      setLoading(false);
       console.error("Login error:", error.response || error);
       setError(
         error.response?.data?.message ||

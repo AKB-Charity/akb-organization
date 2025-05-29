@@ -1,66 +1,67 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Camera, Image as ImageIcon, Upload, RotateCw } from "lucide-react";
 import api from "../../api.js";
 import img1 from "../../assets/fundraising.png";
 import html2canvas from "html2canvas";
+import { useLocation, useNavigationType } from "react-router-dom";
+import { LoadingContext } from "../CustomComponent/Context.jsx";
+import { useRef } from "react";
+import { toast } from "react-toastify";
 
-const DonorCardOverlay = ({ name, category, website, instagram, phoneNo }) => (
-  <div
-    className="absolute left-1/2 -translate-x-1/2 w-[250px] p-3 bg-white shadow-lg rounded-lg"
-    style={{ bottom: "40px" }} // Fixed bottom position
-    id="donor-card-overlay"
-  >
-    <div className="flex flex-col items-center">
-      <div className="w-16 h-16 rounded-full bg-blue-200 flex items-center justify-center mb-3">
-        <div className="w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full bg-blue-600" />
+const DonorCardOverlay = ({name, category}) => {
+  return (
+    <div className="absolute left-1/2 top-[80%] transform -translate-x-1/2 -translate-y-1/2 w-64 shadow-lg" id="donor-card-overlay">
+      <div className="bg-gray-100">
+        {/* Name Section */}
+        <div className="p-4">
+          <div className="text-xl font-black tracking-tight">
+            {name}
+          </div>
+        </div>
+        
+        {/* Footer Section */}
+        <div className="bg-black text-white p-3 flex items-center justify-between">
+          {/* QR Code */}
+          <div className="w-16 h-16 bg-white flex items-center justify-center">
+            <div className="w-14 h-14 grid grid-cols-8 gap-0">
+              {/* This is a simplified QR code representation */}
+              {Array(64).fill().map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`${Math.random() > 0.7 ? 'bg-white' : 'bg-black'}`}
+                ></div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Foundation Info */}
+          <div className="ml-2">
+            <div className="flex items-center mb-1">
+              <div className="w-4 h-4 mr-1 relative">
+                <div className="absolute inset-0 bg-white" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 20% 0, 20% 80%, 80% 80%, 80% 0)' }}></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-2 bg-white"></div>
+              </div>
+              <span className="text-base font-bold tracking-wide">AKB</span>
+            </div>
+            <div className="text-xs font-medium tracking-wide mb-1">FOUNDATION</div>
+            <div className="text-xs mb-0.5">WWW.AKBFOUNDATION.ORG</div>
+            <div className="flex items-center text-xs">
+              <span className="mr-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-0.02-12.64c-2.18 0-3.9 1.73-3.9 3.9 0 2.18 1.72 3.9 3.9 3.9 2.18 0 3.9-1.73 3.9-3.9 0-2.18-1.73-3.9-3.9-3.9zm0 6.46c-1.41 0-2.56-1.15-2.56-2.56s1.15-2.56 2.56-2.56c1.41 0 2.56 1.15 2.56 2.56s-1.15 2.56-2.56 2.56z" />
+                </svg>
+              </span>
+              akbfoundation
+            </div>
+          </div>
         </div>
       </div>
-      <h1 className="text-md font-bold text-blue-900 mb-1">AKB FOUNDATION</h1>
-      <div className="text-blue-900 py-1 px-3 font-bold text-xs rounded-full mb-1">
-        {"PROVIDE GRCOERIES TO POOR"}
-      </div>
-      <p className="text-xs text-center font-bold uppercase text-blue-900 mb-1">
-        {name || "DONOR NAME"}
-      </p>
-      <p className="text-xs text-center text-black italic font-semibold mb-3">
-        Making Change Together
-      </p>
-      <div className="text-xs text-center text-blue-900 font-medium">
-        <a
-          href={website || "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block underline mb-1"
-        >
-          {website || "Website"}
-        </a>
-        <a
-          href={`https://instagram.com/${instagram || ""}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block underline mb-1"
-        >
-          {instagram ? `@${instagram}` : "Instagram"}
-        </a>
-        <p className="block">{phoneNo || "Phone Number"}</p>
-      </div>
     </div>
-  </div>
-);
-
-const LoadingOverlay = () => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-lg font-semibold">Please wait...</p>
-      <p className="text-gray-600">Your image is being processed</p>
-    </div>
-  </div>
-);
+  );
+}
 
 const CameraComponent = ({ onClose, onCapture, name, category }) => {
-  const videoRef = React.useRef(null);
+  const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState("environment");
 
@@ -85,7 +86,7 @@ const CameraComponent = ({ onClose, onCapture, name, category }) => {
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert(
+      toast.warn(
         "Unable to access camera. Please ensure you've granted camera permissions."
       );
     }
@@ -107,42 +108,94 @@ const CameraComponent = ({ onClose, onCapture, name, category }) => {
   };
 
   const handleCapture = () => {
-    const canvas = document.createElement("canvas");
     const video = videoRef.current;
-
-    if (video) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-
-      // Handle mirroring for front camera
-      if (facingMode === "user") {
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-      }
-
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const donorCard = document.getElementById("donor-card-overlay");
-      if (donorCard) {
-        html2canvas(donorCard).then((donorCardCanvas) => {
-          // Calculate consistent positioning
-          const scale = 1.5;
-          const cardWidth = donorCardCanvas.width * scale;
-          const cardHeight = donorCardCanvas.height * scale;
-          const x = (canvas.width - cardWidth) / 2;
-          const y = canvas.height - cardHeight - 40; // Consistent with CSS bottom: 40px
-
-          ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation
-          ctx.drawImage(donorCardCanvas, x, y, cardWidth, cardHeight);
-
-          const imageData = canvas.toDataURL("image/jpeg", 1.0);
-          onCapture(imageData);
-        });
-      } else {
-        const imageData = canvas.toDataURL("image/jpeg", 1.0);
+    if (!video) return;
+    
+    // Create two canvases - one for the raw video frame, one for the final composition
+    const videoCanvas = document.createElement("canvas");
+    const finalCanvas = document.createElement("canvas");
+    
+    // Step 1: Get the intrinsic video dimensions (from the video stream)
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+    
+    // Step 2: Get the actual displayed dimensions
+    const displayRect = video.getBoundingClientRect();
+    const displayWidth = displayRect.width;
+    const displayHeight = displayRect.height;
+    
+    // Set up the canvases
+    videoCanvas.width = videoWidth;
+    videoCanvas.height = videoHeight;
+    finalCanvas.width = displayWidth;
+    finalCanvas.height = displayHeight;
+    
+    // Draw the raw video frame first (at native resolution)
+    const videoCtx = videoCanvas.getContext("2d");
+    videoCtx.drawImage(video, 0, 0, videoWidth, videoHeight);
+    
+    // Now calculate how this would be displayed on screen
+    const finalCtx = finalCanvas.getContext("2d");
+    
+    // Calculate the scaling and positioning to match what's seen on screen
+    const videoAspect = videoWidth / videoHeight;
+    const displayAspect = displayWidth / displayHeight;
+    
+    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+    
+    // Handle the scaling based on object-fit property (assuming 'cover' as default)
+    // You may need to adjust this to match your CSS settings
+    if (videoAspect > displayAspect) {
+      // Video is wider than display area (height limited)
+      drawHeight = displayHeight;
+      drawWidth = videoWidth * (displayHeight / videoHeight);
+      offsetX = (displayWidth - drawWidth) / 2;
+    } else {
+      // Video is taller than display area (width limited)
+      drawWidth = displayWidth;
+      drawHeight = videoHeight * (displayWidth / videoWidth);
+      offsetY = (displayHeight - drawHeight) / 2;
+    }
+    
+    // Apply mirroring if front camera
+    if (facingMode === "user") {
+      finalCtx.translate(finalCanvas.width, 0);
+      finalCtx.scale(-1, 1);
+    }
+    
+    // Draw the video frame scaled and positioned to match display
+    finalCtx.drawImage(videoCanvas, offsetX, offsetY, drawWidth, drawHeight);
+    
+    // Reset transform before adding overlay
+    if (facingMode === "user") {
+      finalCtx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    
+    // Add the donor card overlay
+    const donorCard = document.getElementById("donor-card-overlay");
+    if (donorCard) {
+      html2canvas(donorCard).then((donorCardCanvas) => {
+        const scale = 0.5;
+        const overlayWidth = donorCardCanvas.width * scale;
+        const overlayHeight = donorCardCanvas.height * scale;
+        
+        const centerX = (finalCanvas.width - overlayWidth) / 2;
+        const centerY = (finalCanvas.height - overlayHeight) * 0.9;
+        
+        finalCtx.drawImage(
+          donorCardCanvas,
+          centerX,
+          centerY,
+          overlayWidth,
+          overlayHeight
+        );
+        
+        const imageData = finalCanvas.toDataURL("image/jpeg", 0.8);
         onCapture(imageData);
-      }
+      });
+    } else {
+      const imageData = finalCanvas.toDataURL("image/jpeg", 0.8);
+      onCapture(imageData);
     }
   };
 
@@ -167,7 +220,7 @@ const CameraComponent = ({ onClose, onCapture, name, category }) => {
         </button>
       </div>
 
-      <div className="flex gap-4 mt-2 mb-4">
+      <div className="flex gap-4 mt-4">
         <button
           onClick={handleCapture}
           className="px-6 py-2 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700"
@@ -185,63 +238,62 @@ const CameraComponent = ({ onClose, onCapture, name, category }) => {
   );
 };
 
-const CapturedImageComponent = ({
-  imageData,
-  onRetake,
-  onAccept,
-  name,
-  category,
-}) => {
-  return (
-    <div className="flex flex-col items-center w-full h-full">
-      <div className="relative w-full h-[75vh] flex items-center justify-center">
-        {/* Display Captured Image */}
-        {imageData ? (
-          <div className="relative w-full h-full flex justify-center items-center">
-            <img
-              src={imageData}
-              alt="Captured"
-              className="w-auto h-full object-contain rounded-md shadow-lg"
-            />
-          </div>
-        ) : (
-          <p>No image captured</p>
-        )}
-      </div>
-
-      {/* Buttons */}
-      <div className="flex gap-4 mt-4">
-        <button
-          onClick={onRetake}
-          className="px-6 py-2 mb-4 bg-yellow-500 text-white rounded-full font-semibold hover:bg-yellow-600"
-        >
-          Retake
-        </button>
-        <button
-          onClick={onAccept}
-          className="px-6 py-2 mb-4 bg-green-500 text-white rounded-full font-semibold hover:bg-green-600"
-        >
-          Accept
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const ImagesGrid = ({ images }) => (
-  <>
-    <div className="text-xl font-semibold mt-6 mb-4">Images</div>
-    <div className="grid grid-cols-3 gap-4 px-4">
-      {images.map((image, index) => (
-        <div key={index} className="bg-gray-200 p-2 shadow-lg rounded-md">
+const CapturedImageComponent = ({ imageData, onRetake, onAccept }) => (
+  <div className="flex flex-col items-center w-full h-full">
+    <div className="relative w-full h-[75vh] flex items-center justify-center">
+      {imageData ? (
+        <div className="relative w-full h-full flex justify-center items-center">
           <img
+            src={imageData}
+            alt="Captured"
+            className="w-auto h-full object-contain rounded-md shadow-lg"
+          />
+        </div>
+      ) : (
+        <p>No image captured</p>
+      )}
+    </div>
+
+    <div className="flex gap-4 mt-4">
+      <button
+        onClick={onRetake}
+        className="px-6 py-2 bg-yellow-500 text-white rounded-full font-semibold hover:bg-yellow-600"
+      >
+        Retake
+      </button>
+      <button
+        onClick={onAccept}
+        className="px-6 py-2 bg-green-500 text-white rounded-full font-semibold hover:bg-green-600"
+      >
+        Accept
+      </button>
+    </div>
+  </div>
+);
+
+const ImagesGrid = ({ images, toggleViewImages }) => (
+  <div className="w-full px-4">
+    <h2 className="text-xl font-semibold mt-6 mb-4">Images</h2>
+    <div className="grid grid-cols-1 gap-4">
+      {images.map((image, index) => (
+        <div key={index} className="bg-gray-200 p-2 rounded-lg shadow-md">
+          <img
+            src={image}
             alt={`Uploaded ${index + 1}`}
             className="w-full h-auto object-cover rounded"
           />
         </div>
       ))}
     </div>
-  </>
+    <div className="flex gap-4 mt-4">
+      <button
+        onClick={toggleViewImages}
+        className="px-6 py-2 bg-gray-500 text-white rounded-full font-semibold hover:bg-gray-600"
+      >
+        Close
+      </button>
+    </div>
+  </div>
 );
 
 const GroceriesMobileComponent = () => {
@@ -270,6 +322,10 @@ const GroceriesMobileComponent = () => {
     donation_img: null,
     additional_img: null,
   });
+  const {setLoading} = useContext(LoadingContext);
+
+  const location = useLocation();
+  const navigationType = useNavigationType();
 
   useEffect(() => {
     const fetchDonorInfo = async () => {
@@ -287,27 +343,50 @@ const GroceriesMobileComponent = () => {
 
     fetchDonorInfo();
 
+    // Set up event listeners for page exit
     const handlePopState = (event) => {
-      event.preventDefault();
       setShowExitConfirmation(true);
-      window.history.pushState(null, null, window.location.href);
     };
 
     window.addEventListener("popstate", handlePopState);
-    window.history.pushState(null, null, window.location.href);
+    
+    if (!sessionStorage.getItem("pushed")) {
+      sessionStorage.setItem("pushed", "true");
+      window.history.pushState(null, "", window.location.href);
+    }
+
+    const handleBeforeUnload = () => {
+      const navEntries = performance.getEntriesByType("navigation");
+      const isReload = navEntries[0]?.type === "reload";
+
+      if (!isReload) {
+        sessionStorage.removeItem("pushed");
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
       window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
+  useEffect(() => {
+    if(navigationType === "POP") {
+      sessionStorage.removeItem("pushed");
+    }
+  }, [location, navigationType]);
+
   const handleExit = async () => {
     try {
-      await api.post("/api/unblock/");
+      if(donorInfo.donation_id){
+        await api.post("/api/unblock/", {"donation_id": donorInfo.donation_id});
+      }
     } catch (error) {
       console.error("Error calling unblock API:", error);
     } finally {
-      window.location.href = "/organization/select-donation-category";
+      window.history.back();
     }
   };
 
@@ -353,7 +432,6 @@ const GroceriesMobileComponent = () => {
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true);
     try {
       const convertToBlob = async (dataUrl) => {
         const response = await fetch(dataUrl);
@@ -383,6 +461,7 @@ const GroceriesMobileComponent = () => {
 
       console.log("Submitting donation with data:", formData);
 
+      setLoading(true);
       const response = await api.post(
         "/api/upload_donation2_images/",
         formData,
@@ -392,25 +471,29 @@ const GroceriesMobileComponent = () => {
           },
         }
       );
+      setLoading(false);
 
       if (response.status === 200) {
-        alert("Donation submitted successfully!");
+        toast.success("Donation submitted successfully!");
         window.location.reload();
       } else {
         throw new Error("Submission failed");
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error submitting donation:", error);
-      alert(`Failed to submit donation: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+      toast.error(`Failed to submit donation: ${error.message}`);
     }
+  };
+
+  const toggleViewImages = () => {
+    setViewUploadedImages(!viewUploadedImages);
+    setShowCamera(false);
+    setCapturedImage(null);
   };
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">
-      {isLoading && <LoadingOverlay />}
-
       <header className="w-full py-4 bg-gray-200 text-center font-bold text-lg">
         Organization Dashboard
       </header>
@@ -426,7 +509,10 @@ const GroceriesMobileComponent = () => {
             <div className="flex gap-4 mt-4">
               <button
                 className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-full hover:bg-gray-600"
-                onClick={() => setShowExitConfirmation(false)}
+                onClick={() => {
+                  setShowExitConfirmation(false);
+                  window.history.pushState(null, null, window.location.href);
+                }}
               >
                 No
               </button>
@@ -442,7 +528,7 @@ const GroceriesMobileComponent = () => {
       )}
 
       {viewUploadedImages ? (
-        <ImagesGrid images={uploadedImages} />
+        <ImagesGrid images={uploadedImages} toggleViewImages={toggleViewImages} />
       ) : !showCamera && !capturedImage ? (
         <>
           <div className="w-11/12 max-w-md px-4 py-6 mt-6 bg-white rounded-lg shadow-md mx-auto">
@@ -488,8 +574,8 @@ const GroceriesMobileComponent = () => {
           <div className="flex flex-col w-full max-w-md space-y-4 px-4 mb-6 mt-6">
             <label
               className={`mx-auto w-3/4 py-3 ${
-                uploadedStatus.bill ? "bg-green-500" : "bg-[#407daa]"
-              } text-white rounded-full text-sm font-semibold hover:bg-blue-700 flex items-center justify-center gap-2 cursor-pointer`}
+                uploadedStatus.bill ? "bg-green-500" : "bg-[#407daa] hover:bg-blue-700"
+              } text-white rounded-full text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer`}
             >
               <Upload size={20} />
               Upload Bill
@@ -501,8 +587,8 @@ const GroceriesMobileComponent = () => {
             </label>
             <label
               className={`mx-auto w-3/4 py-3 ${
-                uploadedStatus.groceries ? "bg-green-500" : "bg-[#407daa]"
-              } text-white rounded-full text-sm font-semibold hover:bg-blue-700 flex items-center justify-center gap-2 cursor-pointer`}
+                uploadedStatus.groceries ? "bg-green-500" : "bg-[#407daa] hover:bg-blue-700"
+              } text-white rounded-full text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer`}
             >
               <Upload size={20} />
               Upload Groceries
@@ -514,8 +600,8 @@ const GroceriesMobileComponent = () => {
             </label>
             <button
               className={`mx-auto w-3/4 py-3 ${
-                uploadedStatus.donation_img ? "bg-green-500" : "bg-[#407daa]"
-              } text-white rounded-full text-sm font-semibold hover:bg-blue-700 flex items-center justify-center gap-2`}
+                uploadedStatus.donation_img ? "bg-green-500" : "bg-[#407daa] hover:bg-blue-700"
+              } text-white rounded-full text-sm font-semibold flex items-center justify-center gap-2`}
               onClick={() => {
                 setShowCamera(true);
                 setCurrentType("donation_img");

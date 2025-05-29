@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 import api from "../../api";
+import { FaHome } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { useContext } from "react";
+import { LoadingContext } from "../CustomComponent/Context";
 
 const ContactHelpMobile = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +20,7 @@ const ContactHelpMobile = () => {
   });
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
+  const {setLoading} = useContext(LoadingContext);
 
   const validateForm = () => {
     let isValid = true;
@@ -76,22 +81,25 @@ const ContactHelpMobile = () => {
     data.append("description", formData.description);
 
     try {
+      setLoading(true);
       const response = await api.post("api/org_issue/", data);
 
       if (response.status === 200) {
-        window.alert("Issue submitted successfully");
-        navigate("/organization/organization-home");
+        toast.success("Issue submitted successfully");
+        window.history.back();
       } else {
         console.error(
           "Submission failed",
           response.status,
           response.statusText
         );
-        window.alert("Failed to submit issue. Please try again.");
+        toast.warn("Failed to submit issue. Please try again.");
       }
     } catch (error) {
       console.error("Error:", error);
-      window.alert("An error occurred. Please try again later.");
+      toast.error("An error occurred. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,9 +144,12 @@ const ContactHelpMobile = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">
-      <header className="w-full py-4 bg-gray-200 text-center font-bold text-lg">
-        Organization Dashboard
-      </header>
+      <div className="relative flex flex-row items-center w-full p-4 bg-gray-200">
+        <FaHome className="absolute left-4 text-3xl text-black-600 cursor-pointer" onClick={() => navigate("/organization/home")} />
+        <header className="mx-auto text-center font-bold text-lg">
+          Organization Dashboard
+        </header>
+      </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-md px-4 space-y-5">
         <div>

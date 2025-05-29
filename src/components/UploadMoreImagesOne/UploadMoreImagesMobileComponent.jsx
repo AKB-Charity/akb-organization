@@ -4,6 +4,7 @@ import { Camera, Image as ImageIcon, Upload, RotateCw } from "lucide-react";
 import img1 from "../../assets/fundraising.png";
 import CapturedImageComponent from "../ImagePreview/CapturedImageComponent";
 import DonorCardOverlay from "../ImagePreview/DonorCardOverlay";
+import { toast } from "react-toastify";
 
 const CameraComponent = ({ onClose, onCapture, name }) => {
   const videoRef = React.useRef(null);
@@ -31,7 +32,7 @@ const CameraComponent = ({ onClose, onCapture, name }) => {
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert(
+      toast.warn(
         "Unable to access camera. Please ensure you've granted camera permissions."
       );
     }

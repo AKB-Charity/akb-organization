@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
+import { FaHome } from "react-icons/fa";
+import { LoadingContext } from "../CustomComponent/Context";
+import { useContext } from "react";
+import { toast } from "react-toastify";
 
 const UploadBill = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +18,7 @@ const UploadBill = () => {
     documents: "",
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const {setLoading} = useContext(LoadingContext);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -86,12 +91,13 @@ const UploadBill = () => {
     data.append("amount_paid", formData.amount);
 
     try {
+      setLoading(true);
       const response = await api.post("/api/upload_expenses/", data);
 
       if (response.status === 200) {
         console.log("File uploaded successfully");
-        window.alert("File uploaded successfully");
-        navigate("/organization/volunteer-home");
+        toast.success("File uploaded successfully");
+        window.history.back();
       } else {
         console.error(
           "File upload failed",
@@ -105,6 +111,8 @@ const UploadBill = () => {
       if (error.response) {
         console.error("Error response data:", error.response.data);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,9 +147,12 @@ const UploadBill = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100">
-      <header className="w-full py-4 bg-gray-200 text-center font-bold text-lg">
-        Organization Dashboard
-      </header>
+      <div className="relative flex flex-row items-center w-full p-4 bg-gray-200">
+        <FaHome className="absolute left-4 text-3xl text-black-600 cursor-pointer" onClick={() => navigate("/organization/home")} />
+        <header className="mx-auto text-center font-bold text-lg">
+          Organization Dashboard
+        </header>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 w-full max-w-md px-4">
         <div>
