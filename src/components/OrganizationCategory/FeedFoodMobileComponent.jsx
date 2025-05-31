@@ -271,7 +271,24 @@ const CapturedImageComponent = ({ imageData, onRetake, onAccept }) => (
   </div>
 );
 
-const ImagesGrid = ({ images, toggleViewImages }) => (
+const ImagesGrid = ({ images, toggleViewImages, setLoading }) => {
+  const [loadedImages, setLoadedImages] = useState(0);
+
+  useEffect(() => {
+    setLoading(true);
+  }, []);
+
+  useEffect(() => {
+    if(loadedImages == images.length) {
+      setLoading(false);
+    }
+  }, [loadedImages]);
+
+  const handleImageLoad = () => {
+    setLoadedImages(prev => prev + 1)
+  }
+
+  return (
   <div className="w-full px-4">
     <h2 className="text-xl font-semibold mt-6 mb-4">Images</h2>
     <div className="grid grid-cols-1 gap-4">
@@ -281,6 +298,7 @@ const ImagesGrid = ({ images, toggleViewImages }) => (
             src={image}
             alt={`Uploaded ${index + 1}`}
             className="w-full h-auto object-cover rounded"
+            onLoad={handleImageLoad}
           />
         </div>
       ))}
@@ -294,7 +312,7 @@ const ImagesGrid = ({ images, toggleViewImages }) => (
       </button>
     </div>
   </div>
-);
+);}
 
 const FeedFoodMobileComponent = () => {
   const [showCamera, setShowCamera] = useState(false);
@@ -467,7 +485,7 @@ const FeedFoodMobileComponent = () => {
       )}
 
       {viewUploadedImages ? (
-        <ImagesGrid images={uploadedImages} toggleViewImages={toggleViewImages} />
+        <ImagesGrid images={uploadedImages} toggleViewImages={toggleViewImages} setLoading={setLoading} />
       ) : !showCamera && !capturedImage ? (
         <>
           <div className="w-11/12 max-w-md px-4 py-6 mt-6 bg-white rounded-lg shadow-md">
