@@ -226,11 +226,23 @@ const ContactHelpMobile = () => {
           <ErrorMessage message={errors.documents} />
           {imagePreview && (
             <div className="mt-4 flex justify-center">
-              <img
-                src={imagePreview}
-                alt="Document Preview"
-                className="max-w-[200px] max-h-[200px] rounded-lg object-contain"
-              />
+              {formData.documents?.type.startsWith("image/") ? (
+                <img
+                  src={imagePreview}
+                  alt="Image Preview"
+                  style={{ maxWidth: "200px", maxHeight: "200px" }}
+                  className="w-full h-auto rounded-lg"
+                />
+              ) : (
+                <a
+                  href={imagePreview}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  View Uploaded File
+                </a>
+              )}
             </div>
           )}
         </div>
